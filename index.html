@@ -1,0 +1,796 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Finanzas de Personal | Dashboard</title>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        /* --- VARIABLES Y TEMAS --- */
+        :root {
+            --bg-primary: #f8fafc;
+            --bg-card: #ffffff;
+            --text-primary: #0f172a;
+            --text-secondary: #64748b;
+            --border-color: #e2e8f0;
+            --primary: #6366f1;
+            --primary-hover: #4f46e5;
+            --success: #10b981;
+            --success-bg: #ecfdf5;
+            --danger: #ef4444;
+            --danger-bg: #fef2f2;
+            --shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05), 0 4px 6px -4px rgba(0, 0, 0, 0.05);
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        [data-theme="dark"] {
+            --bg-primary: #0f172a;
+            --bg-card: #1e293b;
+            --text-primary: #f8fafc;
+            --text-secondary: #94a3b8;
+            --border-color: #334155;
+            --primary: #818cf8;
+            --primary-hover: #6366f1;
+            --success: #34d399;
+            --success-bg: rgba(52, 211, 153, 0.1);
+            --danger: #f87171;
+            --danger-bg: rgba(248, 113, 113, 0.1);
+            --shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3), 0 4px 6px -4px rgba(0, 0, 0, 0.3);
+        }
+
+        /* --- ESTILOS GENERALES --- */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-primary);
+            color: var(--text-primary);
+            transition: var(--transition);
+            min-height: 100vh;
+            padding: 2rem 1rem;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        /* --- HEADER --- */
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2.5rem;
+            animation: fadeIn 0.5s ease;
+        }
+
+        .logo-area h1 {
+            font-size: 1.75rem;
+            font-weight: 700;
+            letter-spacing: -0.025em;
+        }
+
+        .logo-area p {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            margin-top: 0.25rem;
+        }
+
+        .theme-btn {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            color: var(--text-primary);
+            padding: 0.75rem;
+            border-radius: 12px;
+            cursor: pointer;
+            box-shadow: var(--shadow);
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .theme-btn:hover {
+            transform: translateY(-2px);
+            border-color: var(--primary);
+        }
+
+        /* --- TARJETAS DE RESUMEN (RESUMEN FINANCIERO) --- */
+        .summary-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2.5rem;
+            animation: slideUp 0.6s ease;
+        }
+
+        .card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 1.5rem;
+            box-shadow: var(--shadow);
+            transition: var(--transition);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .card:hover {
+            transform: translateY(-4px);
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            color: var(--text-secondary);
+            font-size: 0.875rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+        }
+
+        .card-icon {
+            padding: 0.5rem;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .card-value {
+            font-size: 1.85rem;
+            font-weight: 700;
+            letter-spacing: -0.03em;
+        }
+
+        /* Colores específicos de tarjetas */
+        .card.balance .card-icon { background: rgba(99, 102, 241, 0.1); color: var(--primary); }
+        .card.income .card-icon { background: var(--success-bg); color: var(--success); }
+        .card.expense .card-icon { background: var(--danger-bg); color: var(--danger); }
+
+        /* --- CONTROLES Y FILTROS --- */
+        .controls-section {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 1.25rem;
+            box-shadow: var(--shadow);
+            margin-bottom: 1.5rem;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+            align-items: center;
+            animation: slideUp 0.7s ease;
+        }
+
+        .search-box {
+            flex: 1;
+            min-width: 260px;
+            position: relative;
+        }
+
+        .search-box i {
+            position: absolute;
+            left: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-secondary);
+            pointer-events: none;
+        }
+
+        .search-box input {
+            width: 100%;
+            padding: 0.75rem 1rem 0.75rem 2.7rem;
+            border-radius: 10px;
+            border: 1px solid var(--border-color);
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            outline: none;
+            transition: var(--transition);
+        }
+
+        .search-box input:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15);
+        }
+
+        .filter-group {
+            display: flex;
+            gap: 0.75rem;
+            flex-wrap: wrap;
+        }
+
+        select {
+            padding: 0.75rem 1.5rem;
+            border-radius: 10px;
+            border: 1px solid var(--border-color);
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            outline: none;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        select:focus {
+            border-color: var(--primary);
+        }
+
+        .sort-btn {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.75rem 1rem;
+            background: var(--bg-primary);
+            border: 1px solid var(--border-color);
+            color: var(--text-primary);
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: var(--transition);
+        }
+
+        .sort-btn:hover {
+            background: var(--border-color);
+        }
+
+        /* --- SECCIÓN PRINCIPAL / TABLA --- */
+        .table-container {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            box-shadow: var(--shadow);
+            overflow-x: auto;
+            animation: slideUp 0.8s ease;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+            min-width: 900px;
+        }
+
+        th {
+            background: var(--bg-primary);
+            padding: 1rem 1.5rem;
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--text-secondary);
+            border-bottom: 1px solid var(--border-color);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        td {
+            padding: 1.25rem 1.5rem;
+            border-bottom: 1px solid var(--border-color);
+            font-size: 0.95rem;
+            white-space: nowrap;
+        }
+
+        tr:last-child td {
+            border-bottom: none;
+        }
+
+        tr:hover td {
+            background: rgba(99, 102, 241, 0.02);
+        }
+
+        /* Badges de Estado */
+        .badge {
+            padding: 0.35rem 0.75rem;
+            border-radius: 50px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.25rem;
+        }
+
+        .badge.income { background: var(--success-bg); color: var(--success); }
+        .badge.expense { background: var(--danger-bg); color: var(--danger); }
+
+        .employee-info {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .employee-name {
+            font-weight: 600;
+        }
+
+        .employee-id {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+        }
+
+        /* Botones de Acción */
+        .actions-cell {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .action-btn {
+            border: none;
+            padding: 0.5rem;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .action-btn.edit { background: rgba(99, 102, 241, 0.1); color: var(--primary); }
+        .action-btn.edit:hover { background: var(--primary); color: white; }
+        .action-btn.delete { background: var(--danger-bg); color: var(--danger); }
+        .action-btn.delete:hover { background: var(--danger); color: white; }
+
+        /* --- MODAL FORMULARIO --- */
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(15, 23, 42, 0.6);
+            backdrop-filter: blur(4px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            pointer-events: none;
+            transition: var(--transition);
+            z-index: 1000;
+        }
+
+        .modal.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .modal-content {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 2rem;
+            width: 100%;
+            max-width: 500px;
+            box-shadow: var(--shadow);
+            transform: scale(0.9);
+            transition: var(--transition);
+        }
+
+        .modal.active .modal-content {
+            transform: scale(1);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .close-modal {
+            background: transparent;
+            border: none;
+            color: var(--text-secondary);
+            cursor: pointer;
+        }
+
+        .form-group {
+            margin-bottom: 1.25rem;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 0.875rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: var(--text-secondary);
+        }
+
+        .form-group input, .form-group select {
+            width: 100%;
+            padding: 0.75rem;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            outline: none;
+        }
+
+        .form-group input:focus, .form-group select:focus {
+            border-color: var(--primary);
+        }
+
+        .submit-btn {
+            width: 100%;
+            padding: 0.75rem;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .submit-btn:hover {
+            background: var(--primary-hover);
+        }
+
+        /* --- ANIMACIONES --- */
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* --- AJUSTES RESPONSIVOS ADICIONALES --- */
+        @media (max-width: 768px) {
+            body { padding: 1rem 0.5rem; }
+            header { flex-direction: column; align-items: flex-start; gap: 1rem; }
+            .theme-btn { align-self: flex-end; }
+            .controls-section { flex-direction: column; align-items: stretch; }
+            .filter-group { flex-direction: column; }
+            select, .sort-btn { width: 100%; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <header>
+            <div class="logo-area">
+                <h1>Finanzas Corporativas</h1>
+                <p>Dashboard de Gestión de Gastos e Ingresos de Personal</p>
+            </div>
+            <button class="theme-btn" id="themeToggle" title="Cambiar Tema">
+                <i data-lucide="moon"></i>
+            </button>
+        </header>
+
+        <div class="summary-grid">
+            <div class="card balance">
+                <div class="card-header">
+                    <span>SALDO TOTAL DISPONIBLE</span>
+                    <div class="card-icon"><i data-lucide="wallet"></i></div>
+                </div>
+                <div class="card-value" id="totalBalance">$0.00</div>
+            </div>
+            <div class="card income">
+                <div class="card-header">
+                    <span>INGRESOS TOTALES</span>
+                    <div class="card-icon"><i data-lucide="trending-up"></i></div>
+                </div>
+                <div class="card-value" id="totalIncome">$0.00</div>
+            </div>
+            <div class="card expense">
+                <div class="card-header">
+                    <span>GASTOS TOTALES</span>
+                    <div class="card-icon"><i data-lucide="trending-down"></i></div>
+                </div>
+                <div class="card-value" id="totalExpenses">$0.00</div>
+            </div>
+        </div>
+
+        <div class="controls-section">
+            <div class="search-box">
+                <i data-lucide="search"></i>
+                <input type="text" id="searchDesc" placeholder="Buscar por descripción o trabajador...">
+            </div>
+            <div class="filter-group">
+                <select id="filterType">
+                    <option value="all">Todos los Tipos</option>
+                    <option value="Ingreso">Ingresos</option>
+                    <option value="Gasto">Gastos</option>
+                </select>
+                <select id="filterCategory">
+                    <option value="all">Todas las Categorías</option>
+                    <option value="Nómina">Nómina</option>
+                    <option value="Viáticos">Viáticos</option>
+                    <option value="Materiales">Materiales</option>
+                    <option value="Capacitación">Capacitación</option>
+                    <option value="Bonificación">Bonificación</option>
+                    <option value="Seguros">Seguros</option>
+                </select>
+                <button class="sort-btn" id="sortDateBtn">
+                    <i data-lucide="arrow-up-down"></i>
+                    <span>Fecha: Más recientes</span>
+                </button>
+            </div>
+        </div>
+
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Trabajador</th>
+                        <th>Fecha</th>
+                        <th>Descripción</th>
+                        <th>Categoría</th>
+                        <th>Tipo</th>
+                        <th>Monto</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody id="transactionTableBody">
+                    </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="modal" id="editModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Editar Transacción</h2>
+                <button class="close-modal" id="closeModalBtn"><i data-lucide="x"></i></button>
+            </div>
+            <form id="editForm">
+                <input type="hidden" id="editId">
+                <div class="form-group">
+                    <label>Trabajador</label>
+                    <input type="text" id="editEmployee" disabled style="opacity: 0.7; background: var(--border-color)">
+                </div>
+                <div class="form-group">
+                    <label>Fecha</label>
+                    <input type="date" id="editDate" required>
+                </div>
+                <div class="form-group">
+                    <label>Descripción</label>
+                    <input type="text" id="editDesc" required>
+                </div>
+                <div class="form-group">
+                    <label>Categoría</label>
+                    <select id="editCategory">
+                        <option value="Nómina">Nómina</option>
+                        <option value="Viáticos">Viáticos</option>
+                        <option value="Materiales">Materiales</option>
+                        <option value="Capacitación">Capacitación</option>
+                        <option value="Bonificación">Bonificación</option>
+                        <option value="Seguros">Seguros</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Tipo</label>
+                    <select id="editType">
+                        <option value="Ingreso">Ingreso</option>
+                        <option value="Gasto">Gasto</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Monto ($)</label>
+                    <input type="number" step="0.01" id="editAmount" required>
+                </div>
+                <button type="submit" class="submit-btn">Guardar Cambios</button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // --- 1. BASE DE DATOS INICIAL (20 TRABAJADORES CON TRANSACCIONES GRABADAS) ---
+        let dataset = [
+            { id: 1, name: "Carlos Mendoza", empId: "EMP001", date: "2026-06-01", desc: "Pago de Planilla Mensual", category: "Nómina", type: "Gasto", amount: 2500.00 },
+            { id: 2, name: "Ana Rodríguez", empId: "EMP002", date: "2026-06-02", desc: "Reembolso de Viáticos de viaje", category: "Viáticos", type: "Gasto", amount: 320.50 },
+            { id: 3, name: "Luis Martínez", empId: "EMP003", date: "2026-05-28", desc: "Bono por cumplimiento de metas", category: "Bonificación", type: "Ingreso", amount: 500.00 },
+            { id: 4, name: "Sofia Persona", empId: "EMP004", date: "2026-06-03", desc: "Compra de herramientas de software", category: "Materiales", type: "Gasto", amount: 150.00 },
+            { id: 5, name: "Jorge Gonzales", empId: "EMP005", date: "2026-05-15", desc: "Capacitación AWS Cloud", category: "Capacitación", type: "Gasto", amount: 450.00 },
+            { id: 6, name: "Elena Gómez", empId: "EMP006", date: "2026-06-04", desc: "Adelanto de Sueldo Solicitado", category: "Nómina", type: "Gasto", amount: 800.00 },
+            { id: 7, name: "Pedro Infante", empId: "EMP007", date: "2026-06-02", desc: "Devolución de Caja Chica", category: "Viáticos", type: "Ingreso", amount: 75.00 },
+            { id: 8, name: "Lucia Fernández", empId: "EMP008", date: "2026-05-20", desc: "Seguro Médico Corporativo", category: "Seguros", type: "Gasto", amount: 120.00 },
+            { id: 9, name: "Mariano Silva", empId: "EMP009", date: "2026-06-05", desc: "Comisión por ventas de Mayo", category: "Bonificación", type: "Ingreso", amount: 1250.00 },
+            { id: 10, name: "Gabriela Ríos", empId: "EMP010", date: "2026-05-10", desc: "Compra de Laptop de reemplazo", category: "Materiales", type: "Gasto", amount: 1100.00 },
+            { id: 11, name: "Ricardo Gareca", empId: "EMP011", date: "2026-06-01", desc: "Sueldo Mensual Base", category: "Nómina", type: "Gasto", amount: 2700.00 },
+            { id: 12, name: "Patricia Luna", empId: "EMP012", date: "2026-06-02", desc: "Asignación para pasajes", category: "Viáticos", type: "Gasto", amount: 90.00 },
+            { id: 13, name: "Fernando Torres", empId: "EMP013", date: "2026-05-25", desc: "Aporte Financiero Externo Capacitación", category: "Capacitación", type: "Ingreso", amount: 300.00 },
+            { id: 14, name: "Diana Prince", empId: "EMP014", date: "2026-06-04", desc: "Licencias UX/UI Anuales", category: "Materiales", type: "Gasto", amount: 600.00 },
+            { id: 15, name: "Sergio Ramos", empId: "EMP015", date: "2026-05-30", desc: "Bono de Aniversario Empresa", category: "Bonificación", type: "Ingreso", amount: 200.00 },
+            { id: 16, name: "Natalia Oreiro", empId: "EMP016", date: "2026-06-05", desc: "Pago por Consultoría Extra", category: "Nómina", type: "Gasto", amount: 1400.00 },
+            { id: 17, name: "Claudio Bravo", empId: "EMP017", date: "2026-05-12", desc: "Reembolso Hotel Visita Técnica", category: "Viáticos", type: "Gasto", amount: 210.00 },
+            { id: 18, name: "Mónica Naranjo", empId: "EMP018", date: "2026-06-06", desc: "Reintegro de Seguro No Utilizado", category: "Seguros", type: "Ingreso", amount: 45.00 },
+            { id: 19, name: "Arturo Vidal", empId: "EMP019", date: "2026-06-03", desc: "Curso de Project Management", category: "Capacitación", type: "Gasto", amount: 350.00 },
+            { id: 20, name: "Vanessa Mae", empId: "EMP020", date: "2026-05-29", desc: "Compra Sillas Ergonómicas", category: "Materiales", type: "Gasto", amount: 850.00 }
+        ];
+
+        // --- 2. ESTADOS DE CONTROL ---
+        let sortDesc = true; // Control de ordenamiento por fecha (True = Reciente a Antiguo)
+
+        // --- 3. SELECCIÓN DE ELEMENTOS DOM ---
+        const tableBody = document.getElementById('transactionTableBody');
+        const totalBalanceEl = document.getElementById('totalBalance');
+        const totalIncomeEl = document.getElementById('totalIncome');
+        const totalExpensesEl = document.getElementById('totalExpenses');
+        
+        const searchInput = document.getElementById('searchDesc');
+        const filterTypeSelect = document.getElementById('filterType');
+        const filterCategorySelect = document.getElementById('filterCategory');
+        const sortDateBtn = document.getElementById('sortDateBtn');
+        const themeToggle = document.getElementById('themeToggle');
+
+        // Modal DOM
+        const editModal = document.getElementById('editModal');
+        const editForm = document.getElementById('editForm');
+        const closeModalBtn = document.getElementById('closeModalBtn');
+
+        // --- 4. CÁLCULOS METRICOS CON ACTUALIZACIÓN AUTOMÁTICA ---
+        function updateMetrics() {
+            let ingresos = 0;
+            let gastos = 0;
+
+            dataset.forEach(item => {
+                if (item.type === 'Ingreso') ingresos += item.amount;
+                else if (item.type === 'Gasto') gastos += item.amount;
+            });
+
+            let saldo = ingresos - gastos;
+
+            // Renderizado con formato de moneda en pantalla
+            totalIncomeEl.textContent = `$${ingresos.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+            totalExpensesEl.textContent = `$${gastos.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+            
+            totalBalanceEl.textContent = `${saldo < 0 ? '-' : ''}$${Math.abs(saldo).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+            totalBalanceEl.style.color = saldo < 0 ? 'var(--danger)' : 'var(--text-primary)';
+        }
+
+        // --- 5. RENDERIZADO DE TABLA CON FILTROS ---
+        function renderTable() {
+            const query = searchInput.value.toLowerCase();
+            const typeFilter = filterTypeSelect.value;
+            const catFilter = filterCategorySelect.value;
+
+            // Filtrados
+            let filteredData = dataset.filter(item => {
+                const matchesSearch = item.name.toLowerCase().includes(query) || item.desc.toLowerCase().includes(query) || item.empId.toLowerCase().includes(query);
+                const matchesType = typeFilter === 'all' || item.type === typeFilter;
+                const matchesCategory = catFilter === 'all' || item.category === catFilter;
+                return matchesSearch && matchesType && matchesCategory;
+            });
+
+            // Ordenamiento por Fecha
+            filteredData.sort((a, b) => {
+                const dateA = new Date(a.date);
+                const dateB = new Date(b.date);
+                return sortDesc ? dateB - dateA : dateA - dateB;
+            });
+
+            // Limpieza e Inyección HTML
+            tableBody.innerHTML = '';
+            
+            if(filteredData.length === 0) {
+                tableBody.innerHTML = `<tr><td colspan="7" style="text-align: center; color: var(--text-secondary)">No se encontraron registros acordes a los criterios.</td></tr>`;
+                return;
+            }
+
+            filteredData.forEach(item => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>
+                        <div class="employee-info">
+                            <span class="employee-name">${item.name}</span>
+                            <span class="employee-id">${item.empId}</span>
+                        </div>
+                    </td>
+                    <td>${formatearFecha(item.date)}</td>
+                    <td style="white-space: normal; min-width: 200px;">${item.desc}</td>
+                    <td>${item.category}</td>
+                    <td>
+                        <span class="badge ${item.type === 'Ingreso' ? 'income' : 'expense'}">
+                            <i data-lucide="${item.type === 'Ingreso' ? 'arrow-up-right' : 'arrow-down-left'}" style="width:14px; height:14px;"></i>
+                            ${item.type}
+                        </span>
+                    </td>
+                    <td style="font-weight: 600; color: ${item.type === 'Gasto' ? 'var(--danger)' : 'var(--success)'}">
+                        ${item.type === 'Gasto' ? '-' : '+'}$${item.amount.toFixed(2)}
+                    </td>
+                    <td>
+                        <div class="actions-cell">
+                            <button class="action-btn edit" onclick="openEditModal(${item.id})" title="Editar"><i data-lucide="edit-2" style="width:16px; height:16px;"></i></button>
+                            <button class="action-btn delete" onclick="deleteTransaction(${item.id})" title="Eliminar"><i data-lucide="trash-2" style="width:16px; height:16px;"></i></button>
+                        </div>
+                    </td>
+                `;
+                tableBody.appendChild(tr);
+            });
+
+            lucide.createIcons(); // Re-renderizar iconos dinámicos
+        }
+
+        function formatearFecha(fechaStr) {
+            const opciones = { year: 'numeric', month: 'short', day: 'numeric' };
+            return new Date(fechaStr + 'T00:00:00').toLocaleDateString('es-ES', opciones);
+        }
+
+        // --- 6. ACCIONES: ELIMINAR Y EDITAR ---
+        function deleteTransaction(id) {
+            if(confirm('¿Está seguro de que desea eliminar esta transacción de la lista de gestión?')) {
+                dataset = dataset.filter(item => item.id !== id);
+                updateMetrics();
+                renderTable();
+            }
+        }
+
+        function openEditModal(id) {
+            const item = dataset.find(x => x.id === id);
+            if(!item) return;
+
+            document.getElementById('editId').value = item.id;
+            document.getElementById('editEmployee').value = `${item.name} (${item.empId})`;
+            document.getElementById('editDate').value = item.date;
+            document.getElementById('editDesc').value = item.desc;
+            document.getElementById('editCategory').value = item.category;
+            document.getElementById('editType').value = item.type;
+            document.getElementById('editAmount').value = item.amount;
+
+            editModal.classList.add('active');
+        }
+
+        // Envío de Formulario Editado
+        editForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const id = parseInt(document.getElementById('editId').value);
+            const itemIndex = dataset.findIndex(x => x.id === id);
+
+            if(itemIndex !== -1) {
+                dataset[itemIndex].date = document.getElementById('editDate').value;
+                dataset[itemIndex].desc = document.getElementById('editDesc').value;
+                dataset[itemIndex].category = document.getElementById('editCategory').value;
+                dataset[itemIndex].type = document.getElementById('editType').value;
+                dataset[itemIndex].amount = parseFloat(document.getElementById('editAmount').value);
+
+                editModal.classList.remove('active');
+                updateMetrics();
+                renderTable();
+            }
+        });
+
+        // Cerrar Modal
+        closeModalBtn.addEventListener('click', () => editModal.classList.remove('active'));
+        window.addEventListener('click', (e) => { if(e.target === editModal) editModal.classList.remove('active'); });
+
+        // --- 7. ESCUCHADORES DE EVENTOS (FILTROS / ORDEN) ---
+        searchInput.addEventListener('input', renderTable);
+        filterTypeSelect.addEventListener('change', renderTable);
+        filterCategorySelect.addEventListener('change', renderTable);
+        
+        sortDateBtn.addEventListener('click', () => {
+            sortDesc = !sortDesc;
+            const textEl = sortDateBtn.querySelector('span');
+            textEl.textContent = sortDesc ? "Fecha: Más recientes" : "Fecha: Más antiguas";
+            renderTable();
+        });
+
+        // --- 8. GESTOR DE MODO CLARO / OSCURO ---
+        themeToggle.addEventListener('click', () => {
+            const currentTheme = document.documentElement.getAttribute('data-theme');
+            let newTheme = 'light';
+            let iconName = 'moon';
+
+            if (currentTheme !== 'dark') {
+                newTheme = 'dark';
+                iconName = 'sun';
+            }
+            
+            document.documentElement.setAttribute('data-theme', newTheme);
+            themeToggle.innerHTML = `<i data-lucide="${iconName}"></i>`;
+            lucide.createIcons();
+        });
+
+        // --- INICIALIZACIÓN ---
+        document.addEventListener('DOMContentLoaded', () => {
+            lucide.createIcons();
+            updateMetrics();
+            renderTable();
+        });
+    </script>
+</body>
+</html>
